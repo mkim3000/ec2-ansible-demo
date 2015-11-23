@@ -1,0 +1,34 @@
+---
+  - name: ELB and ec2 register 
+    hosts: local
+    connection: local
+    gather_facts: False
+    tags: provisioning
+
+    vars:
+      security_group: tomcat-sesrver 
+      keypair: mk-keypair
+
+    tasks:
+
+      - name: Create ELB
+        local_action:
+          module: ec2_elb_lb
+          name: "demo-elb"
+        #  security_group_names: 'tomcat-sesrver' parameter available in ansible 2.0 (vs. 1.94)
+          state: present
+          zones:
+            - us-west-2a
+          listeners:
+            - protocol: http
+              load_balancer_port: 9000
+              instance_port: 9000
+          health_check:
+              ping_protocol: http
+              ping_port: 9000
+              ping_path: "/"
+              response_timeout: 5 # seconds
+              interval: 5 # seconds
+              unhealthy_threshold: 2
+              healthy_threshold: 5
+

@@ -1,0 +1,9 @@
+---
+# War deploy to Tomcat
+
+- hosts: demo-servers 
+  remote_user: ec2-user
+
+  roles:
+    - war 
+

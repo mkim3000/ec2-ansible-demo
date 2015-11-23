@@ -1,0 +1,17 @@
+- hosts: demo-servers 
+
+  tasks:
+
+    - name: Gathering ec2 facts
+      action: ec2_facts
+
+    - name: ec2 register
+      local_action:
+        module: ec2_elb
+        instance_id: "{{ ansible_ec2_instance_id }}"
+        ec2_elbs: "demo-elb"
+        state: present
+
+#    - debug: var=hostvars[inventory_hostname]
+#    - debug: msg="{{ hostvars[inventory_hostname]['ec2_id'] }}"
+

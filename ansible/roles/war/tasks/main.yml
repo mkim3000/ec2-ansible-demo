@@ -1,0 +1,21 @@
+---
+- name: Download war
+  get_url: url=http://s3-us-west-2.amazonaws.com/demo-mk/petstoreWeb.war dest=/opt/tomcat/webapps/petstoreWeb.war
+  sudo: True
+
+- name: Tomcat start
+  command: systemctl restart tomcat
+  sudo: True
+
+- name: Tomcat startup script
+  command: /opt/tomcat/bin/startup.sh
+#  command: /opt/tomcat/bin/catalina.sh start
+  sudo: True
+
+#- name: Wait until war is deployed
+#  wait_for:
+#    path: "{{ war_deploy_path }}/{{ app_name }}/index.html"
+
+- name: Start Tomcat
+  service: name=tomcat state=started enabled=yes
+  sudo: True

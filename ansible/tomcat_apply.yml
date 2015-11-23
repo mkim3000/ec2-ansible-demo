@@ -1,0 +1,9 @@
+---
+# tomcat deploy
+
+- hosts: demo-servers 
+  remote_user: ec2-user
+
+  roles:
+#    - selinux
+    - tomcat

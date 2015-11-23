@@ -1,0 +1,89 @@
+---
+- name: Download JDK 7 79 - Centos/RHEL 7
+  get_url: url=http://s3-us-west-2.amazonaws.com/demo-mk/jdk-7u79-linux-x64.rpm dest=/tmp/jdk-7u79-linux-x64.rpm
+  when: "ansible_os_family == 'RedHat' and ansible_distribution_major_version == '7'"
+
+- name: Install JDK 7 79 - Centos/RHEL 7
+  #command: sudo yum install epel-release -y
+  command: sudo rpm -ivh /tmp/jdk-7u79-linux-x64.rpm
+  when: "ansible_os_family == 'RedHat' and ansible_distribution_major_version == '7'"
+
+- name: add group "tomcat"
+  command: groupadd tomcat
+  sudo: True
+
+- name: add user "tomcat"
+  command: useradd -M -s /bin/nologin -g tomcat -d /opt/tomcat tomcat
+  sudo: True
+
+- name: Tomcat directory create
+  command: mkdir /opt/tomcat
+  sudo: True
+
+- name: Download Tomcat
+  get_url: url=http://www.webhostingjams.com/mirror/apache/tomcat/tomcat-8/v8.0.28/bin/apache-tomcat-8.0.28.tar.gz dest=/opt/tomcat/apache-tomcat-8.0.28.tar.gz
+  sudo: True
+
+- name: Extract archive
+  command: chdir=/usr/share tar xvf /opt/tomcat/apache-tomcat-8.0.28.tar.gz -C /opt/tomcat --strip-components=1 creates=/opt/tomcat/apache-tomcat-8.0.28
+  sudo: True  
+
+- name: Change group
+  command: chdir=/opt/tomcat chgrp -R tomcat conf
+  sudo: True
+
+- name: Change mod
+  command: chdir=/opt/tomcat chmod -R g+rwx conf
+  sudo: True
+
+- name: chown
+  command: chdir=/opt/tomcat chown -R tomcat webapps/ work/ temp/ logs/
+  sudo: True
+
+- name: Tomcat service creation Install
+  copy: src=tomcat.service dest=/etc/systemd/system  mode=0755
+  sudo: True
+
+- name: Tomcat daemon-reload
+  command: systemctl daemon-reload
+  sudo: True
+
+- name: Tomcat start
+  command: systemctl start tomcat
+  sudo: True
+
+- name: Tomcat enable
+  command: systemctl enable tomcat
+  sudo: True
+
+- name: Tomcat startup script
+  command: /opt/tomcat/bin/startup.sh
+#  command: /opt/tomcat/bin/catalina.sh start
+  sudo: True
+
+#- name: wait for tomcat to start
+#  wait_for: port=8080
+
+#- name: Wait until war is deployed
+#  wait_for:
+#    path: "{{ war_deploy_path }}/{{ app_name }}/index.html"
+
+#- name: Symlink install directory
+#  file: src=/opt/apache-tomcat-7.0.61 path=/usr/share/tomcat state=link
+
+- name: Configure Tomcat server
+  template: src=server.xml dest=/opt/tomcat/conf/
+  notify: restart tomcat
+  sudo: True
+
+#- name: Configure Tomcat users
+#  template: src=tomcat-users.xml dest=/usr/share/tomcat/conf/
+#  notify: restart tomcat
+
+- name: Start Tomcat
+  service: name=tomcat state=started enabled=yes
+  sudo: True
+
+#- name: deploy iptables rules
+#  template: src=iptables-save dest=/etc/sysconfig/iptables
+#  notify: restart iptables
