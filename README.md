@@ -1,5 +1,5 @@
 # ec2-ansible-demo
-ec2 automation demo 
+AWS automation demo 
 
 Automated provisioning & related configuration of typical AWS web application deployment using Ansible
 
